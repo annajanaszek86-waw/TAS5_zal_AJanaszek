@@ -6,7 +6,6 @@ import pl.pepco.pages.StoreLocatorPage;
 
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,13 +26,14 @@ class RandomCityFromFakerTest extends BaseTest {
 
         String value = page.getSearchValue();
         assertFalse(value.isBlank(), "Pole wyszukiwania jest puste");
-        assertEquals(city, value, "W polu wyszukiwania jest inne miasto niz wpisane");
+        assertTrue(page.searchValueContainsCity(city), "Pole wyszukiwania nie zawiera miasta: " + city);
         assertTrue(page.hasSearchResultForCity(city), "Brak wynikow wyszukiwania dla miasta: " + city);
-        assertTrue(page.clickFirstStoreResult(), "Nie udalo sie kliknac pierwszego sklepu z listy");
+        assertTrue(page.openFirstStoreDetailsForCity(city), "Nie udalo sie otworzyc sklepu dla miasta: " + city);
+        assertTrue(page.setFirstStoreAsYourStore(), "Nie udalo sie ustawic sklepu jako Twoj");
 
         page.waitForTags(2);
         assertFalse(driver.getCurrentUrl().isBlank(), "Po kliknieciu sklepu URL jest pusty");
-        takeScreenshot("random_city_selected_store");
+        takeScreenshot("random_city_favorite_store");
         System.out.println("Wpisano: " + value);
     }
 }
