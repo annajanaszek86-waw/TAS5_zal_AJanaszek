@@ -1,0 +1,30 @@
+Dzien dobry,
+
+w zalaczniku przesylam moja prace zaliczeniowa z automatyzacji testow w Javie z wykorzystaniem Selenium WebDriver, JUnit 5 oraz Maven.
+
+Do testow wybralam strone pepco.pl, poniewaz pracuje dla Pepco i na co dzien zajmuje sie u nich obszarem DMP, czyli Data Management Platform. Dlatego ten temat byl mi najblizszy i chcialam oprzec testy na stronie, ktora znam z praktyki.
+
+Projekt sklada sie z testow automatycznych strony Pepco oraz klas Page Object. Testy znajduja sie w katalogu src/test/java. W projekcie sa m.in. testy:
+
+- wyszukiwarki sklepow,
+- wyszukiwania miasta z uzyciem danych losowych,
+- stron kolekcji produktow,
+- strony Pepco Club,
+- strony oferty gazetkowej,
+- requestow/pikseli zwiazanych z Mediarithmics i DMP.
+
+W projekcie zastosowalam tez podejscie data driven testing. Dane sa przekazywane m.in. przez CSV oraz MethodSource. Dzieki temu czesc testow wykonuje sie dla roznych zestawow danych.
+
+Po poprawkach test wyszukiwarki sklepow z Fakerem nie sprawdza juz tylko tego, czy pole wyszukiwania nie jest puste. Teraz test wpisuje miasto, sprawdza czy pojawil sie wynik wyszukiwania i klika pierwszy sklep z listy. Usunelam tez metode, ktora zawsze zwracala true, poniewaz nie byla dobra asercja.
+
+Projekt mozna uruchomic z konsoli przez Maven Wrapper:
+
+.\mvnw.cmd test
+
+Pojedynczy poprawiony test mozna uruchomic komenda:
+
+.\mvnw.cmd -Dtest=RandomCityFromFakerTest test
+
+Ten test zostal sprawdzony i zakonczyl sie wynikiem BUILD SUCCESS.
+
+Pozdrawiam

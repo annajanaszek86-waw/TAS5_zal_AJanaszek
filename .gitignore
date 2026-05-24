@@ -1,0 +1,7 @@
+target/
+screenshots/
+.mvn/apache-maven-*/
+.mvn/*.zip
+.vscode/
+.idea/
+*.iml
