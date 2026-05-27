@@ -4,13 +4,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
 public class CollectionPage extends BasePage {
-    private static final By TITLE = By.cssSelector("h1");
     private static final By PRODUCT_LINK = By.cssSelector("a[href*='/products/']");
+
+    @FindBy(css = "h1")
+    private WebElement title;
+
+    @FindBy(css = "a[href*='/products/']")
+    private List<WebElement> productLinks;
 
     public CollectionPage(WebDriver driver) {
         super(driver);
@@ -22,7 +28,7 @@ public class CollectionPage extends BasePage {
 
     public String getTitle() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(TITLE)).getText();
+            return wait.until(ExpectedConditions.visibilityOf(title)).getText();
         } catch (WebDriverException ignored) {
             return null;
         }
@@ -30,20 +36,24 @@ public class CollectionPage extends BasePage {
 
     public boolean areProductsVisible() {
         try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(PRODUCT_LINK));
-            return !driver.findElements(PRODUCT_LINK).isEmpty();
+            wait.until(ExpectedConditions.visibilityOfAllElements(productLinks));
+            return !productLinks.isEmpty();
         } catch (WebDriverException ignored) {
             return false;
         }
     }
 
     public String clickFirstProduct() {
-        List<WebElement> products = driver.findElements(PRODUCT_LINK);
-        if (products.isEmpty()) {
+        return clickProduct(0);
+    }
+
+    public String clickProduct(int index) {
+        List<WebElement> products = wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(PRODUCT_LINK, index));
+        if (products.size() <= index) {
             return null;
         }
-        String productUrl = products.get(0).getAttribute("href");
-        products.get(0).click();
+        String productUrl = products.get(index).getAttribute("href");
+        click(products.get(index));
         return productUrl;
     }
 

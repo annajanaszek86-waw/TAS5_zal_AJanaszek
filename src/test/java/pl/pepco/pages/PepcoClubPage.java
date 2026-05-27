@@ -3,12 +3,16 @@ package pl.pepco.pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class PepcoClubPage extends BasePage {
-    private static final By TITLE = By.cssSelector("h1");
     public static final By APP_STORE = By.xpath("//a[contains(@href,'apple.com')]");
     public static final By GOOGLE_PLAY = By.xpath("//a[contains(@href,'play.google.com')]");
+
+    @FindBy(css = "h1")
+    private WebElement title;
 
     public PepcoClubPage(WebDriver driver) {
         super(driver);
@@ -20,7 +24,7 @@ public class PepcoClubPage extends BasePage {
 
     public boolean isTitleVisible() {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(TITLE));
+            wait.until(ExpectedConditions.visibilityOf(title));
             return true;
         } catch (WebDriverException ignored) {
             return false;
@@ -32,6 +36,16 @@ public class PepcoClubPage extends BasePage {
                 .findFirst()
                 .map(element -> element.getAttribute("href"))
                 .orElse(null);
+    }
+
+    public boolean clickLink(By selector) {
+        try {
+            WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selector));
+            click(link);
+            return true;
+        } catch (WebDriverException ignored) {
+            return false;
+        }
     }
 
     public boolean hasLink(By selector) {

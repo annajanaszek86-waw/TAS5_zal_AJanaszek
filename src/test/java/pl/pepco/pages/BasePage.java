@@ -4,12 +4,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -25,13 +28,21 @@ import java.util.Optional;
 
 public class BasePage {
     protected static final String BASE_URL = "https://pepco.pl";
+    private static final By COOKIE_BANNER = By.cssSelector("#onetrust-banner-sdk, #onetrust-group-container");
+    private static final By LOADER = By.cssSelector(
+            ".loader, .loading, .spinner, [class*='loader'], [class*='loading'], [aria-busy='true']"
+    );
 
     protected final WebDriver driver;
     protected final WebDriverWait wait;
+    private final List<String> capturedDmpRequests = new ArrayList<>();
+    private final List<Integer> capturedDmpVisitPixelStatuses = new ArrayList<>();
+    private final List<Integer> capturedDmpCheckCookiePixelStatuses = new ArrayList<>();
 
     public BasePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        PageFactory.initElements(driver, this);
     }
 
     public void open(String path) {
@@ -40,27 +51,69 @@ public class BasePage {
 
     public boolean acceptCookies() {
         try {
-            WebElement button = wait.until(ExpectedConditions.elementToBeClickable(By.id("onetrust-accept-btn-handler")));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", button);
-            waitForTags(1);
+            return acceptAllCookies();
+        } catch (WebDriverException acceptFailed) {
             try {
-                button.click();
-            } catch (WebDriverException ignored) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", button);
+                clickCookieButton(By.cssSelector(".onetrust-close-btn-handler"));
+                return true;
+            } catch (WebDriverException closeFailed) {
+                return false;
             }
-            waitForTags(2);
+        }
+    }
+
+    public boolean acceptAllCookies() {
+        try {
+            clickCookieButton(By.id("onetrust-accept-btn-handler"));
             return true;
+        } catch (TimeoutException ignored) {
+            return driver.findElements(COOKIE_BANNER).stream().noneMatch(WebElement::isDisplayed);
+        }
+    }
+
+    private void clickCookieButton(By selector) {
+        WebElement button = wait.until(ExpectedConditions.elementToBeClickable(selector));
+        try {
+            button.click();
+        } catch (WebDriverException clickIntercepted) {
+            button.sendKeys(Keys.ENTER);
+        }
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(COOKIE_BANNER));
+    }
+
+    public void waitForTags(int timeoutSeconds) {
+        WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        pageWait.until(webDriver -> "complete".equals(
+                ((JavascriptExecutor) webDriver).executeScript("return document.readyState")
+        ));
+    }
+
+    public void waitUntilPageSettled(int timeoutSeconds) {
+        WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        pageWait.until(webDriver -> "complete".equals(
+                ((JavascriptExecutor) webDriver).executeScript("return document.readyState")
+        ));
+        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        pageWait.until(webDriver -> webDriver.findElements(COOKIE_BANNER).stream().noneMatch(WebElement::isDisplayed));
+        pageWait.until(webDriver -> webDriver.findElements(LOADER).stream().noneMatch(WebElement::isDisplayed));
+    }
+
+    public boolean waitForDmpRequests(int timeoutSeconds) {
+        try {
+            WebDriverWait tagWait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+            return tagWait.until(webDriver -> !getDmpRequests().isEmpty());
         } catch (WebDriverException ignored) {
             return false;
         }
     }
 
-    public void waitForTags(int seconds) {
-        try {
-            Thread.sleep(Duration.ofSeconds(seconds));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    protected void click(WebElement element) {
+        scrollIntoView(element);
+        wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+    }
+
+    protected void scrollIntoView(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 
     public Path takeScreenshot(String name) {
@@ -76,32 +129,126 @@ public class BasePage {
     }
 
     public List<String> getDmpRequests() {
-        List<String> requests = new ArrayList<>();
+        processDmpLogs();
+        return new ArrayList<>(capturedDmpRequests);
+    }
+
+    public List<Integer> getDmpVisitPixelStatuses() {
+        processDmpLogs();
+        captureDmpStatusesFromPerformanceEntries();
+        return new ArrayList<>(capturedDmpVisitPixelStatuses);
+    }
+
+    public List<Integer> getDmpCheckCookiePixelStatuses() {
+        processDmpLogs();
+        captureDmpStatusesFromPerformanceEntries();
+        return new ArrayList<>(capturedDmpCheckCookiePixelStatuses);
+    }
+
+    private void processDmpLogs() {
         LogEntries logs = driver.manage().logs().get(LogType.PERFORMANCE);
 
         for (LogEntry entry : logs) {
             try {
                 JsonObject root = JsonParser.parseString(entry.getMessage()).getAsJsonObject();
                 JsonObject message = root.getAsJsonObject("message");
-                if (!"Network.requestWillBeSent".equals(message.get("method").getAsString())) {
+                String method = message.get("method").getAsString();
+                JsonObject params = message.getAsJsonObject("params");
+
+                if ("Network.requestWillBeSent".equals(method)) {
+                    String url = params.getAsJsonObject("request").get("url").getAsString();
+                    String decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
+                    if (decoded.contains("mediarithmics.com") && !capturedDmpRequests.contains(decoded)) {
+                        capturedDmpRequests.add(decoded);
+                    }
                     continue;
                 }
-                String url = message.getAsJsonObject("params").getAsJsonObject("request").get("url").getAsString();
-                String decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
-                if (decoded.contains("mediarithmics.com")) {
-                    requests.add(decoded);
+
+                if ("Network.responseReceived".equals(method)) {
+                    JsonObject response = params.getAsJsonObject("response");
+                    String url = URLDecoder.decode(response.get("url").getAsString(), StandardCharsets.UTF_8);
+                    if (url.contains("events.mediarithmics.com/v1/visits/pixel")) {
+                        int status = response.get("status").getAsInt();
+                        if (!capturedDmpVisitPixelStatuses.contains(status)) {
+                            capturedDmpVisitPixelStatuses.add(status);
+                        }
+                    }
+                    if (url.contains("events.mediarithmics.com/v1/check_cookie/pixel")) {
+                        int status = response.get("status").getAsInt();
+                        if (!capturedDmpCheckCookiePixelStatuses.contains(status)) {
+                            capturedDmpCheckCookiePixelStatuses.add(status);
+                        }
+                    }
                 }
             } catch (RuntimeException ignored) {
                 // Chrome performance logs contain many event shapes; unrelated entries are skipped.
             }
         }
-
-        return requests;
     }
 
     public boolean checkPixelFired() {
         return getDmpRequests().stream()
+                .anyMatch(request -> request.contains("events.mediarithmics.com/v1/visits/pixel")
+                        || request.contains("events.mediarithmics.com/v1/check_cookie/pixel"));
+    }
+
+    public boolean checkVisitPixelFired() {
+        return getDmpRequests().stream()
                 .anyMatch(request -> request.contains("events.mediarithmics.com/v1/visits/pixel"));
+    }
+
+    public boolean checkCookiePixelFired() {
+        return getDmpRequests().stream()
+                .anyMatch(request -> request.contains("events.mediarithmics.com/v1/check_cookie/pixel"));
+    }
+
+    public List<String> getDmpSiteTokens() {
+        return getDmpRequests().stream()
+                .map(this::extractSiteToken)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .distinct()
+                .toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void captureDmpStatusesFromPerformanceEntries() {
+        Object result = ((JavascriptExecutor) driver).executeScript("""
+                return performance.getEntriesByType('resource')
+                    .filter(entry => entry.name.includes('events.mediarithmics.com/v1/visits/pixel')
+                        || entry.name.includes('events.mediarithmics.com/v1/check_cookie/pixel'))
+                    .map(entry => ({ name: entry.name, status: entry.responseStatus || 0 }));
+                """);
+
+        if (!(result instanceof List<?> entries)) {
+            return;
+        }
+
+        for (Object entry : entries) {
+            if (!(entry instanceof java.util.Map<?, ?> resource)) {
+                continue;
+            }
+
+            Object nameValue = resource.get("name");
+            Object statusValue = resource.get("status");
+            if (!(nameValue instanceof String name) || !(statusValue instanceof Number statusNumber)) {
+                continue;
+            }
+
+            int status = statusNumber.intValue();
+            if (status <= 0) {
+                continue;
+            }
+
+            if (name.contains("events.mediarithmics.com/v1/visits/pixel")
+                    && !capturedDmpVisitPixelStatuses.contains(status)) {
+                capturedDmpVisitPixelStatuses.add(status);
+            }
+            if (name.contains("events.mediarithmics.com/v1/check_cookie/pixel")
+                    && !capturedDmpCheckCookiePixelStatuses.contains(status)) {
+                capturedDmpCheckCookiePixelStatuses.add(status);
+            }
+        }
     }
 
     public Optional<String> getDmpPagePath() {
@@ -130,5 +277,15 @@ public class BasePage {
         } catch (RuntimeException ignored) {
             return Optional.empty();
         }
+    }
+
+    private Optional<String> extractSiteToken(String request) {
+        String marker = "$site_token=";
+        int tokenIndex = request.indexOf(marker);
+        if (tokenIndex < 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(request.substring(tokenIndex + marker.length()).split("&", 2)[0]);
     }
 }

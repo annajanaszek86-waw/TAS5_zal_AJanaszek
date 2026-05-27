@@ -1,17 +1,19 @@
 package pl.pepco.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
 public class TrendyPage extends BasePage {
-    private static final By TITLE = By.cssSelector("h1");
     private static final By PRODUCT_LINK = By.cssSelector("a[href*='/products/']");
+
+    @FindBy(css = "h1")
+    private WebElement title;
 
     public TrendyPage(WebDriver driver) {
         super(driver);
@@ -23,7 +25,7 @@ public class TrendyPage extends BasePage {
 
     public String getTitle() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(TITLE)).getText();
+            return wait.until(ExpectedConditions.visibilityOf(title)).getText();
         } catch (WebDriverException ignored) {
             return null;
         }
@@ -51,9 +53,7 @@ public class TrendyPage extends BasePage {
                 return false;
             }
             WebElement product = products.get(index);
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", product);
-            waitForTags(1);
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", product);
+            click(product);
             return true;
         } catch (WebDriverException ignored) {
             return false;

@@ -8,13 +8,11 @@ public final class CollectionData {
     private CollectionData() {
     }
 
-    public static Stream<Arguments> collections() {
+
+    public static Stream<Arguments> returnPolicyCollections() {
         return Stream.of(
-                Arguments.of("kolekcja_dom", "/collections/dom", "Dom"),
-                Arguments.of("kolekcja_oswietlenie", "/collections/dom/oswietlenie", "Oswietlenie"),
-                Arguments.of("kolekcja_dziecko", "/collections/dziecko", "Dziecko"),
-                Arguments.of("kolekcja_niemowle_chl", "/collections/niemowle/chlopiec-56-98", "chlopiec"),
-                Arguments.of("kolekcja_dziewczynka", "/collections/dziecko/dziewczynka-134-176", "dziewczeta")
+                Arguments.of("zwroty_oswietlenie", "/collections/dom/oswietlenie", "/centrum-pomocy/zwroty"),
+                Arguments.of("zwroty_chlopiec", "/collections/dziecko/chlopiec-92-134", "pepco-privacy.my.onetrust.com/policies")
         );
     }
 }

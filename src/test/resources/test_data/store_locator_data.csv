@@ -2,5 +2,5 @@ name,city,expected_text
 warszawa,Warszawa,Warszawa
 krakow,Krakow,Krakow
 gdansk,Gdansk,Gdansk
-wroclaw,Wroclaw,Wroclaw
-aleksandrow,Aleksandrow,Aleksandr
+wroclaw,Wrocław,Wrocław
+poznan,Poznań,Poznań

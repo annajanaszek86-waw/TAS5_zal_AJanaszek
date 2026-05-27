@@ -16,9 +16,12 @@ public abstract class BaseTest {
     @BeforeEach
     void setUp() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--incognito");
+        if (useIncognito()) {
+            options.addArguments("--incognito");
+        }
         options.addArguments("--start-maximized");
         options.setCapability("goog:loggingPrefs", Map.of(LogType.PERFORMANCE, "ALL"));
+        options.setExperimentalOption("perfLoggingPrefs", Map.of("enableNetwork", true));
         driver = new ChromeDriver(options);
     }
 
@@ -31,5 +34,9 @@ public abstract class BaseTest {
 
     protected Path takeScreenshot(String name) {
         return new pl.pepco.pages.BasePage(driver).takeScreenshot(name);
+    }
+
+    protected boolean useIncognito() {
+        return true;
     }
 }
