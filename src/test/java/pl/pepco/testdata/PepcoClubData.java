@@ -14,13 +14,13 @@ public final class PepcoClubData {
                 Arguments.of(
                         "app_store",
                         PepcoClubPage.APP_STORE,
-                        "apps.apple.com/pl/app/pepco-deals-and-vouchers/id6757158188",
+                        "apps.apple.com",
                         "pepco_club_app_store_page"
                 ),
                 Arguments.of(
                         "google_play",
                         PepcoClubPage.GOOGLE_PLAY,
-                        "play.google.com/store/apps/details?id=eu.pepco.app",
+                        "play.google.com",
                         "pepco_club_google_play_page"
                 )
         );

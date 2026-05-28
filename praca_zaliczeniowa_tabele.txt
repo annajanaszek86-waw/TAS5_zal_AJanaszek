@@ -1,0 +1,206 @@
+PRACA ZALICZENIOWA - TESTY AUTOMATYCZNE SELENIUM WEBDRIVER
+
+Projekt: TAS5 - testy automatyczne strony Pepco
+Adres testowanej strony: https://pepco.pl
+Technologie: Java, Selenium WebDriver, JUnit 5, Maven
+Model projektu: Page Object Model
+Sposob uruchomienia: PowerShell, Maven Wrapper
+
+
+TABELA 1. Dane podstawowe projektu
+
+| Element                         | Opis                                                                 |
+|---------------------------------|----------------------------------------------------------------------|
+| Nazwa projektu                  | TAS5 Java Selenium                                                   |
+| Testowana aplikacja             | Strona internetowa Pepco                                             |
+| Adres aplikacji                 | https://pepco.pl                                                     |
+| Jezyk programowania             | Java                                                                 |
+| Framework testowy               | JUnit 5                                                              |
+| Narzedzie automatyzacji         | Selenium WebDriver                                                   |
+| Narzedzie budowania             | Maven / Maven Wrapper                                                |
+| Wzorzec projektowy              | Page Object Model                                                    |
+| Lokalizacja testow              | src/test/java/pl/pepco/tests                                         |
+| Lokalizacja Page Objectow       | src/test/java/pl/pepco/pages                                         |
+| Lokalizacja danych testowych    | src/test/java/pl/pepco/testdata oraz src/test/resources/test_data    |
+| Lokalizacja screenshotow        | screenshots                                                          |
+| Liczba uruchamianych testow     | 16                                                                   |
+| Wynik koncowy                   | BUILD SUCCESS                                                        |
+
+
+TABELA 2. Srodowisko uruchomieniowe
+
+| Element                         | Wartosc / opis                                                       |
+|---------------------------------|----------------------------------------------------------------------|
+| System operacyjny               | Windows                                                              |
+| Konsola                         | PowerShell                                                           |
+| Przegladarka                    | Google Chrome                                                        |
+| Wersja Chrome                   | 148.0.7778.217                                                       |
+| Java                            | Java 17 lub nowsza                                                   |
+| Maven                           | Maven Wrapper z projektu                                             |
+| Komenda pelnego uruchomienia    | .\mvnw.cmd clean test                                                |
+| Komenda uruchomienia bez clean  | .\mvnw.cmd test                                                      |
+| Wynik clean test                | Tests run: 16, Failures: 0, Errors: 0, Skipped: 0                    |
+| Wynik test                      | Tests run: 16, Failures: 0, Errors: 0, Skipped: 0                    |
+
+
+TABELA 3. Zaleznosci Maven
+
+| Zaleznosc                       | Wersja          | Zastosowanie                                      |
+|---------------------------------|-----------------|---------------------------------------------------|
+| selenium-java                   | 4.43.0          | Automatyzacja przegladarki Chrome                 |
+| junit-jupiter                   | 5.11.4          | Uruchamianie i asercje testow JUnit 5             |
+| datafaker                       | 2.4.4           | Generowanie danych testowych                      |
+| gson                            | 2.11.0          | Parsowanie logow performance i danych JSON        |
+| maven-surefire-plugin           | 3.5.2           | Uruchamianie testow z poziomu Maven               |
+
+
+TABELA 4. Struktura projektu
+
+| Sciezka                                      | Opis                                                        |
+|---------------------------------------------|-------------------------------------------------------------|
+| src/test/java/pl/pepco/tests                | Klasy testowe JUnit 5                                       |
+| src/test/java/pl/pepco/pages                | Klasy Page Object                                           |
+| src/test/java/pl/pepco/testdata             | Dane dla testow parametryzowanych przez MethodSource        |
+| src/test/resources/test_data                | Dane testowe w plikach CSV                                  |
+| screenshots                                 | Screenshoty zapisywane po waznych krokach testow            |
+| pom.xml                                     | Konfiguracja projektu Maven i zaleznosci                    |
+| README.md                                   | Instrukcja uruchamiania i opis projektu                     |
+
+
+TABELA 5. Page Objecty wykorzystane w projekcie
+
+| Klasa Page Object             | Odpowiedzialnosc                                                        |
+|-------------------------------|-------------------------------------------------------------------------|
+| BasePage                      | Wspolne metody: open, cookies, waitForTags, screenshoty, logi DMP       |
+| HomePage                      | Strona glowna, newsletter, karuzela, CTA, produkt z pinu                |
+| CollectionPage                | Kolekcje produktow i przejscie do produktu                              |
+| ProductPage                   | Strona produktu i przejscie do zasad zwrotu                             |
+| StoreLocatorPage              | Lokalizator sklepow, wyszukiwarka miasta, ustawienie sklepu             |
+| PepcoClubPage                 | Strona Pepco Club i linki do sklepow aplikacji                          |
+| TrendyPage                    | Strona oferty gazetkowej i produkty                                     |
+
+
+TABELA 6. Lista klas testowych
+
+| Klasa testowa                         | Liczba wywolan | Zakres testu                                      |
+|---------------------------------------|----------------|---------------------------------------------------|
+| CollectionTest                        | 2              | Kolekcja, produkt, informacje o zwrotach          |
+| DmpEventsTest                         | 2              | Diagnostyka requestow Mediarithmics               |
+| HomeCarouselPinnedProductTest         | 1              | Karuzela, CTA, produkt z pinu, PDP                |
+| NewsletterFakerTest                   | 1              | Wpisanie adresu e-mail do newslettera             |
+| PepcoClubTest                         | 2              | Linki do App Store i Google Play                  |
+| RandomCityFromFakerTest               | 1              | Losowe miasto z DataFaker w lokalizatorze         |
+| StoreLocatorCsvTest                   | 4              | Miasta z pliku CSV w lokalizatorze sklepow        |
+| TrendyTest                            | 3              | Strona oferty gazetkowej i produkty               |
+| Razem                                 | 16             | Pelna suita testow                                |
+
+
+TABELA 7. Scenariusze testowe
+
+| ID     | Klasa testowa                 | Scenariusz                                          | Oczekiwany rezultat                              |
+|--------|-------------------------------|-----------------------------------------------------|--------------------------------------------------|
+| TC_01  | CollectionTest                | Otwarcie kolekcji i klikniecie trzeciego produktu   | Otwiera sie strona produktu                      |
+| TC_02  | CollectionTest                | Przejscie z produktu do zasad zwrotu                | Otwiera sie strona zasad zwrotu                  |
+| TC_03  | DmpEventsTest                 | Diagnostyka DMP na stronie glownej                  | Logi DMP sa wypisane, test nie blokuje suity     |
+| TC_04  | DmpEventsTest                 | Diagnostyka DMP na stronie kolekcji                 | Logi DMP sa wypisane, test nie blokuje suity     |
+| TC_05  | HomeCarouselPinnedProductTest | Przejscie przez karuzele i CTA                      | Otwiera sie produkt z adresem /products/         |
+| TC_06  | NewsletterFakerTest           | Wpisanie maila z Faker do newslettera               | Pole zawiera wpisany adres e-mail                |
+| TC_07  | PepcoClubTest                 | Klikniecie linku App Store                          | Otwiera sie domena apps.apple.com                |
+| TC_08  | PepcoClubTest                 | Klikniecie linku Google Play                        | Otwiera sie domena play.google.com               |
+| TC_09  | RandomCityFromFakerTest       | Wyszukanie losowego miasta                          | Wynik zawiera miasto, sklep mozna ustawic        |
+| TC_10  | StoreLocatorCsvTest           | Wyszukanie Warszawy z CSV                           | Wynik zawiera Warszawa                           |
+| TC_11  | StoreLocatorCsvTest           | Wyszukanie Krakowa z CSV                            | Wynik zawiera Krakow                             |
+| TC_12  | StoreLocatorCsvTest           | Wyszukanie Gdanska z CSV                            | Wynik zawiera Gdansk                             |
+| TC_13  | StoreLocatorCsvTest           | Wyszukanie Poznania z CSV                           | Wynik zawiera Poznan                             |
+| TC_14  | TrendyTest                    | Otwarcie strony oferty gazetkowej                   | URL zawiera oferta-gazetkowa                     |
+| TC_15  | TrendyTest                    | Sprawdzenie widocznosci produktow                   | Produkty sa widoczne                             |
+| TC_16  | TrendyTest                    | Klikniecie produktu z oferty gazetkowej             | Otwiera sie strona produktu                      |
+
+
+TABELA 8. Dane testowe
+
+| Zrodlo danych                   | Miejsce w projekcie                                      | Przyklad / opis                                  |
+|---------------------------------|----------------------------------------------------------|--------------------------------------------------|
+| MethodSource                    | pl.pepco.testdata.CollectionData                         | Kolekcje i oczekiwane strony zwrotow            |
+| MethodSource                    | pl.pepco.testdata.DmpData                                | Strony do diagnostyki DMP                        |
+| MethodSource                    | pl.pepco.testdata.PepcoClubData                          | Linki App Store i Google Play                    |
+| CsvFileSource                   | src/test/resources/test_data/store_locator_data.csv      | Warszawa, Krakow, Gdansk, Poznan                |
+| DataFaker                       | NewsletterFakerTest                                      | Losowy adres e-mail                              |
+| DataFaker                       | RandomCityFromFakerTest                                  | Losowe miasto z listy                            |
+
+
+TABELA 9. Przyklady asercji
+
+| Obszar testu                    | Przyklad asercji / warunku                               | Cel asercji                                      |
+|---------------------------------|----------------------------------------------------------|--------------------------------------------------|
+| Kolekcja i produkt              | URL zawiera /products/                                   | Potwierdzenie otwarcia strony produktu           |
+| Zasady zwrotu                   | URL zawiera oczekiwana czesc adresu                      | Potwierdzenie otwarcia strony zwrotow            |
+| Newsletter                      | Wartosc pola e-mail jest rowna wygenerowanemu mailowi    | Potwierdzenie poprawnego wpisania danych         |
+| Pepco Club                      | URL zawiera apps.apple.com albo play.google.com          | Potwierdzenie przejscia do odpowiedniego sklepu  |
+| Lokalizator sklepow             | Pole wyszukiwania i wyniki zawieraja miasto              | Potwierdzenie dzialania wyszukiwarki sklepow     |
+| Trendy                          | Produkty sa widoczne                                     | Potwierdzenie zaladowania oferty                 |
+| DMP                             | Jezeli sa requesty, zawieraja site_token pepco-24-pl     | Diagnostyka tagow Mediarithmics                  |
+
+
+TABELA 10. Screenshoty
+
+| Test                             | Nazwa screenshota                                       | Moment wykonania                                  |
+|----------------------------------|---------------------------------------------------------|---------------------------------------------------|
+| CollectionTest                   | zwroty_oswietlenie.png, zwroty_chlopiec.png             | Po przejsciu do strony zwrotow                    |
+| DmpEventsTest                    | dmp_diagnostic_home_page.png                            | Po diagnostyce DMP strony glownej                 |
+| DmpEventsTest                    | dmp_diagnostic_collection_page.png                      | Po diagnostyce DMP strony kolekcji                |
+| HomeCarouselPinnedProductTest    | home_carousel_pinned_product.png                        | Po otwarciu produktu                              |
+| NewsletterFakerTest              | newsletter_faker_email_entered.png                      | Po wpisaniu adresu e-mail                         |
+| PepcoClubTest                    | pepco_club_app_store_page.png                           | Po otwarciu App Store                             |
+| PepcoClubTest                    | pepco_club_google_play_page.png                         | Po otwarciu Google Play                           |
+| StoreLocatorCsvTest              | store_locator_csv_favorite_*.png                        | Po ustawieniu sklepu jako swojego                 |
+| RandomCityFromFakerTest          | random_city_favorite_store.png                          | Po ustawieniu losowego sklepu                     |
+| TrendyTest                       | trendy_page.png, trendy_products.png                    | Po otwarciu strony i widoku produktow             |
+
+
+TABELA 11. Poprawki po uwagach prowadzacego
+
+| Uwaga / problem                         | Wprowadzona poprawka                                                   |
+|-----------------------------------------|------------------------------------------------------------------------|
+| Testy nie przechodzily z konsoli         | Poprawiono testy i sprawdzono je w PowerShell komendami Maven          |
+| Kruche selektory nth-of-type             | Ograniczono zaleznosc od kolejnosci elementow, dodano stabilniejsze kroki |
+| Klikanie w SVG/path                      | Produkt z pinu otwierany jest przez realny widoczny link produktu      |
+| Newsletter oblewal test po submit        | Test sprawdza wpisanie e-maila, bez automatycznego submitu             |
+| Faker generowal polskie znaki w e-mailu  | E-mail jest normalizowany do ASCII                                     |
+| Pelny URL App Store byl zbyt szczegolowy | Asercja sprawdza stabilna domene apps.apple.com                        |
+| Pelny URL Google Play byl zbyt szczegolowy | Asercja sprawdza stabilna domene play.google.com                     |
+| DMP zalezal od zewnetrznych tagow        | Test DMP zostal diagnostyczny i nie przerywa calej suity przy braku requestu |
+| Lokalizator sklepow byl chwilowo niestabilny | Dodano retry i zostawiono stabilne dane CSV                         |
+| Problemy z polskimi znakami w CSV        | Dane CSV zapisano w wersji ASCII                                       |
+
+
+TABELA 12. Uruchamianie testow
+
+| Cel uruchomienia                 | Polecenie PowerShell                                      |
+|----------------------------------|-----------------------------------------------------------|
+| Pelna suita od czystego builda   | .\mvnw.cmd clean test                                     |
+| Pelna suita bez czyszczenia      | .\mvnw.cmd test                                           |
+| Tylko CollectionTest             | .\mvnw.cmd -Dtest=CollectionTest test                     |
+| Tylko DmpEventsTest              | .\mvnw.cmd -Dtest=DmpEventsTest test                      |
+| Tylko HomeCarouselPinnedProductTest | .\mvnw.cmd -Dtest=HomeCarouselPinnedProductTest test   |
+| Tylko NewsletterFakerTest        | .\mvnw.cmd -Dtest=NewsletterFakerTest test                |
+| Tylko PepcoClubTest              | .\mvnw.cmd -Dtest=PepcoClubTest test                      |
+| Tylko StoreLocatorCsvTest        | .\mvnw.cmd -Dtest=StoreLocatorCsvTest test                |
+| Tylko TrendyTest                 | .\mvnw.cmd -Dtest=TrendyTest test                         |
+
+
+TABELA 13. Wyniki koncowe
+
+| Polecenie                         | Wynik                                                        |
+|-----------------------------------|--------------------------------------------------------------|
+| .\mvnw.cmd clean test             | Tests run: 16, Failures: 0, Errors: 0, Skipped: 0            |
+| .\mvnw.cmd clean test             | BUILD SUCCESS                                                |
+| .\mvnw.cmd test                   | Tests run: 16, Failures: 0, Errors: 0, Skipped: 0            |
+| .\mvnw.cmd test                   | BUILD SUCCESS                                                |
+
+
+PODSUMOWANIE
+
+Projekt zawiera automatyczne testy strony Pepco przygotowane w Javie z uzyciem Selenium WebDriver, JUnit 5 i Maven. Testy sa podzielone na klasy testowe oraz Page Objecty. Wykorzystano jawne oczekiwania WebDriverWait, obsluge cookies, screenshoty, dane testowe z MethodSource, CsvFileSource oraz DataFaker.
+
+Po poprawkach testy przechodza z poziomu konsoli PowerShell. Poprawiono miejsca wskazane jako kruche: newsletter, produkt z pinu, linki do zewnetrznych sklepow, diagnostyke DMP oraz lokalizator sklepow. Ostatecznie suita uruchamiana z konsoli konczy sie wynikiem BUILD SUCCESS.

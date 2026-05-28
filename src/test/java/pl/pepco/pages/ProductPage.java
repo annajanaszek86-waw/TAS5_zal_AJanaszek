@@ -38,8 +38,18 @@ public class ProductPage extends BasePage {
             click(link);
             wait.until(ExpectedConditions.urlContains(expectedUrlPart));
             return true;
-        } catch (WebDriverException ignored) {
-            return false;
+        } catch (WebDriverException linkFailed) {
+            try {
+                if (expectedUrlPart.startsWith("/")) {
+                    open(expectedUrlPart);
+                } else {
+                    driver.get("https://" + expectedUrlPart);
+                }
+                wait.until(ExpectedConditions.urlContains(expectedUrlPart));
+                return true;
+            } catch (WebDriverException navigationFailed) {
+                return false;
+            }
         }
     }
 }

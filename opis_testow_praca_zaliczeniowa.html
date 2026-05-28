@@ -1,0 +1,341 @@
+﻿<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Opis testów automatycznych - projekt TAS5</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+body { font-family: Arial, Helvetica, sans-serif; color: #172033; line-height: 1.42; font-size: 10.5pt; }
+.cover { min-height: 210mm; display: flex; flex-direction: column; justify-content: center; border-bottom: 4px solid #0072ce; }
+.kicker { color: #0072ce; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 10pt; }
+h1 { font-size: 28pt; margin: 10px 0 16px; color: #003b79; line-height: 1.1; }
+.subtitle { font-size: 14pt; max-width: 560px; color: #334155; }
+.meta { margin-top: 36px; font-size: 11pt; color: #475569; }
+.section-title { font-size: 18pt; color: #003b79; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid #0072ce; }
+.content { white-space: normal; }
+.content br { line-height: 1.4; }
+.content { font-size: 10.3pt; }
+.footer-note { margin-top: 24px; padding: 12px 14px; background: #eef6ff; border-left: 4px solid #0072ce; color: #1e3a5f; }
+strong, b { color: #111827; }
+code { font-family: Consolas, monospace; background: #f1f5f9; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<section class="cover">
+  <div class="kicker">Projekt zaliczeniowy TAS5</div>
+  <h1>Opis testów automatycznych Selenium WebDriver</h1>
+  <div class="subtitle">Dokument przygotowany na podstawie aktualnych testów w projekcie Pepco. Zawiera cel, kroki oraz zakres weryfikacji dla każdej klasy testowej.</div>
+  <div class="meta">
+    <div><strong>Projekt:</strong> TAS5_praca_po_poprawkach</div>
+    <div><strong>Technologie:</strong> Java, Maven, JUnit 5, Selenium WebDriver, Page Object Model, DataFaker</div>
+    <div><strong>Data wygenerowania:</strong> 2026-05-27</div>
+  </div>
+</section>
+<section>
+  <h2 class="section-title">Opis testów</h2>
+  <div class="content">OPIS TESTOW W PROJEKCIE TAS5<br>
+<br>
+Projekt zawiera testy automatyczne Selenium WebDriver uruchamiane przez Maven i JUnit 5.<br>
+Testy korzystaja z Page Object Model, PageFactory, jawnych oczekiwan WebDriverWait oraz danych testowych z plikow CSV, MethodSource i DataFaker.<br>
+<br>
+<br>
+1. CollectionTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=CollectionTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie przejscia z kolekcji produktow do produktu, a nastepnie do informacji o zwrotach.<br>
+<br>
+Test: thirdProductOpensReturnPolicy<br>
+<br>
+Kroki:<br>
+1. Test pobiera dane z CollectionData#returnPolicyCollections.<br>
+2. Otwiera wskazana kolekcje, np. /collections/dom/oswietlenie albo /collections/dziecko/chlopiec-92-134.<br>
+3. Akceptuje cookies.<br>
+4. Klika trzeci produkt na stronie kolekcji.<br>
+5. Sprawdza, czy URL zawiera /products/.<br>
+6. Na stronie produktu klika informacje &quot;30 dni na zwrot&quot;.<br>
+7. Otwiera regulamin lub strone zasad zwrotu.<br>
+8. Sprawdza, czy adres URL zawiera oczekiwany fragment.<br>
+9. Czeka az strona sie ustabilizuje.<br>
+10. Wykonuje screenshot dla danego wariantu testowego.<br>
+<br>
+Co jest sprawdzane:<br>
+- czy kolekcja zawiera co najmniej trzy produkty,<br>
+- czy klikniecie produktu otwiera strone produktu,<br>
+- czy z produktu da sie przejsc do informacji o zwrotach,<br>
+- czy otwierana jest poprawna strona/regulamin zwrotow.<br>
+<br>
+<br>
+2. DmpEventsTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=DmpEventsTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie, czy po zaakceptowaniu cookies odpalaja sie requesty Mediarithmics oraz czy zawieraja site_token=pepco-24-pl.<br>
+<br>
+Test: mediarithmicsDiagnostic<br>
+<br>
+Kroki:<br>
+1. Test pobiera dane z DmpData#pages.<br>
+2. Uruchamia sie bez trybu incognito, poniewaz tracking moze wymagac zapisanych cookies.<br>
+3. Otwiera testowana strone, np. strone glowna albo strone kolekcji.<br>
+4. Akceptuje wszystkie cookies.<br>
+5. Odswieza strone po zapisaniu zgody.<br>
+6. Czeka na requesty DMP/Mediarithmics.<br>
+7. Pobiera requesty z logow performance Chrome.<br>
+8. Sprawdza, czy pojawil sie pixel Mediarithmics.<br>
+9. Rozroznia visits/pixel oraz check_cookie/pixel.<br>
+10. Wypisuje w konsoli:<br>
+   - liczbe requestow Mediarithmics,<br>
+   - status pixela,<br>
+   - czy odpalil sie visits/pixel,<br>
+   - czy odpalil sie check_cookie/pixel,<br>
+   - statusy HTTP, jesli Selenium je udostepni,<br>
+   - site_token.<br>
+11. Sprawdza, czy lista requestow nie jest pusta.<br>
+12. Sprawdza, czy pixel sie odpalil.<br>
+13. Sprawdza, czy wystepuje site_token=pepco-24-pl.<br>
+14. Jesli status HTTP jest dostepny, sprawdza czy zawiera 200.<br>
+15. Wykonuje screenshot diagnostyczny.<br>
+<br>
+Uwaga:<br>
+Chrome/Selenium nie zawsze udostepnia status HTTP dla beaconow/pixeli. Dlatego test traktuje status HTTP jako informacje diagnostyczna, jesli jest dostepna.<br>
+<br>
+<br>
+3. HomeCarouselPinnedProductTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=HomeCarouselPinnedProductTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie sciezki ze strony glownej: karuzela, CTA, pin produktu na zdjeciu i przejscie na strone produktu.<br>
+<br>
+Test: carouselCtaPinnedProductOpensPdp<br>
+<br>
+Kroki:<br>
+1. Otwiera strone glowna pepco.pl.<br>
+2. Czeka na zaladowanie strony.<br>
+3. Akceptuje cookies.<br>
+4. Przechodzi po karuzeli na stronie glownej.<br>
+5. Klika CTA z sekcji na stronie glownej.<br>
+6. Klika pin produktu widoczny na zdjeciu.<br>
+7. Klika produkt pokazany w panelu pinu.<br>
+8. Czeka na przejscie do strony produktu.<br>
+9. Sprawdza, czy URL zawiera /products/.<br>
+10. Wykonuje screenshot home_carousel_pinned_product.<br>
+<br>
+Co jest sprawdzane:<br>
+- czy karuzela jest interaktywna,<br>
+- czy CTA na stronie glownej dziala,<br>
+- czy pin produktu na zdjeciu otwiera panel produktu,<br>
+- czy klikniecie produktu z pinu prowadzi do strony PDP.<br>
+<br>
+<br>
+4. NewsletterFakerTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=NewsletterFakerTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie zapisu do newslettera z uzyciem adresu e-mail wygenerowanego przez DataFaker.<br>
+<br>
+Test: subscribesToNewsletterWithFakerEmail<br>
+<br>
+Kroki:<br>
+1. Otwiera strone glowna pepco.pl.<br>
+2. Czeka na zaladowanie strony.<br>
+3. Akceptuje cookies.<br>
+4. Generuje adres e-mail przez DataFaker.<br>
+5. Wypisuje wygenerowany e-mail w konsoli.<br>
+6. Wpisuje e-mail do formularza newslettera.<br>
+7. Zaznacza zgode marketingowa.<br>
+8. Klika przycisk &quot;Zapisz sie&quot;.<br>
+9. Wykonuje screenshot po wyslaniu formularza.<br>
+10. Czeka na komunikat potwierdzajacy zapis.<br>
+11. Wykonuje drugi screenshot z komunikatem potwierdzenia.<br>
+<br>
+Co jest sprawdzane:<br>
+- czy mozna wpisac wygenerowany e-mail,<br>
+- czy checkbox zgody zostal zaznaczony,<br>
+- czy formularz newslettera zostal wyslany,<br>
+- czy pojawia sie komunikat potwierdzajacy zapis.<br>
+<br>
+Uwaga:<br>
+Formularz newslettera moze byc czasem blokowany przez mechanizmy antyspamowe albo backend newslettera. Wtedy test moze pokazac, ze formularz zostal wypelniony, ale komunikat potwierdzenia nie pojawil sie.<br>
+<br>
+<br>
+5. PepcoClubTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=PepcoClubTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie linkow do aplikacji Pepco w App Store i Google Play.<br>
+<br>
+Test: appStorePageOpensAfterClick<br>
+<br>
+Kroki:<br>
+1. Test pobiera dane z PepcoClubData#appStoreLinks.<br>
+2. Otwiera strone /pepco-club.<br>
+3. Akceptuje cookies.<br>
+4. Sprawdza, czy URL zawiera pepco-club.<br>
+5. Sprawdza, czy tytul strony Pepco Club jest widoczny.<br>
+6. Klika link App Store albo Google Play.<br>
+7. Przelacza sie na najnowsza karte przegladarki.<br>
+8. Czeka na zaladowanie strony sklepu.<br>
+9. Sprawdza, czy URL zawiera oczekiwany adres:<br>
+   - apps.apple.com/pl/app/pepco-deals-and-vouchers/id6757158188<br>
+   - play.google.com/store/apps/details?id=eu.pepco.app<br>
+10. Wykonuje screenshot strony sklepu.<br>
+<br>
+Co jest sprawdzane:<br>
+- czy strona Pepco Club sie otwiera,<br>
+- czy linki do sklepow aplikacji sa klikalne,<br>
+- czy prowadza do poprawnych zewnetrznych stron,<br>
+- czy dziala obsluga nowej karty.<br>
+<br>
+<br>
+6. RandomCityFromFakerTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=RandomCityFromFakerTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie wyszukiwarki sklepow z losowym miastem wybranym przez DataFaker.<br>
+<br>
+Test: randomCityFromFaker<br>
+<br>
+Kroki:<br>
+1. Otwiera strone /store-locator.<br>
+2. Akceptuje cookies.<br>
+3. Losuje miasto z listy: Warszawa, Krakow, Gdansk, Wroclaw, Poznan, Lodz.<br>
+4. Wypisuje testowane miasto w konsoli.<br>
+5. Wpisuje miasto w wyszukiwarke sklepow.<br>
+6. Sprawdza, czy pole wyszukiwania nie jest puste.<br>
+7. Sprawdza, czy pole zawiera szukane miasto.<br>
+8. Sprawdza, czy pojawil sie wynik wyszukiwania dla miasta.<br>
+9. Otwiera pierwszy sklep z wynikow dla tego miasta.<br>
+10. Ustawia sklep jako &quot;Twoj sklep&quot;.<br>
+11. Sprawdza, czy URL po kliknieciu nie jest pusty.<br>
+12. Wykonuje screenshot random_city_favorite_store.<br>
+<br>
+Co jest sprawdzane:<br>
+- dzialanie wyszukiwarki sklepow,<br>
+- obsluga danych generowanych przez Faker,<br>
+- otwieranie szczegolow sklepu,<br>
+- ustawienie sklepu jako ulubionego.<br>
+<br>
+<br>
+7. StoreLocatorCsvTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=StoreLocatorCsvTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie wyszukiwarki sklepow dla kilku miast z pliku CSV.<br>
+<br>
+Test: searchStoreByCityFromCsv<br>
+<br>
+Kroki:<br>
+1. Test pobiera dane z pliku src/test/resources/test_data/store_locator_data.csv.<br>
+2. Dla kazdego miasta otwiera strone /store-locator.<br>
+3. Akceptuje cookies.<br>
+4. Wpisuje miasto w wyszukiwarke sklepow.<br>
+5. Sprawdza, czy pole wyszukiwania nie jest puste.<br>
+6. Sprawdza, czy pole zawiera oczekiwany tekst miasta.<br>
+7. Sprawdza, czy pojawily sie wyniki wyszukiwania dla miasta.<br>
+8. Otwiera pierwszy sklep z wynikow dla danego miasta.<br>
+9. Ustawia sklep jako &quot;Twoj sklep&quot;.<br>
+10. Wykonuje screenshot store_locator_csv_favorite_nazwa.<br>
+11. Wypisuje testowane miasto w konsoli.<br>
+<br>
+Co jest sprawdzane:<br>
+- data driven testing z plikiem CSV,<br>
+- wyszukiwanie sklepow dla wielu danych,<br>
+- otwieranie szczegolow sklepu,<br>
+- ustawienie sklepu jako ulubionego.<br>
+<br>
+<br>
+8. TrendyTest<br>
+<br>
+Komenda:<br>
+./mvnw -Dtest=TrendyTest test<br>
+<br>
+Cel testu:<br>
+Sprawdzenie strony &quot;Oferta gazetkowa&quot; i produktow widocznych w tej sekcji.<br>
+<br>
+Test: trendyPageOpens<br>
+<br>
+Kroki:<br>
+1. Otwiera /trendy/oferta-gazetkowa.<br>
+2. Akceptuje cookies.<br>
+3. Sprawdza, czy URL zawiera oferta-gazetkowa.<br>
+4. Wykonuje screenshot trendy_page.<br>
+<br>
+Test: productsAreVisible<br>
+<br>
+Kroki:<br>
+1. Otwiera /trendy/oferta-gazetkowa.<br>
+2. Akceptuje cookies.<br>
+3. Sprawdza, czy na stronie sa linki produktow zawierajace /products/.<br>
+4. Wykonuje screenshot trendy_products.<br>
+<br>
+Test: clickProductOpensPdp<br>
+<br>
+Kroki:<br>
+1. Otwiera /trendy/oferta-gazetkowa.<br>
+2. Akceptuje cookies.<br>
+3. Klika pierwszy produkt z listy.<br>
+4. Sprawdza, czy klikniecie sie udalo.<br>
+5. Sprawdza, czy URL zawiera /products/.<br>
+<br>
+Co jest sprawdzane:<br>
+- wejscie na strone oferty gazetkowej,<br>
+- widocznosc produktow,<br>
+- przejscie z listy produktow na strone produktu.<br>
+<br>
+<br>
+9. BaseTest<br>
+<br>
+BaseTest nie jest samodzielnym testem biznesowym, ale jest klasa bazowa dla pozostalych testow.<br>
+<br>
+Zawiera:<br>
+1. Konfiguracje ChromeDriver.<br>
+2. Uruchamianie Chrome w trybie incognito dla wiekszosci testow.<br>
+3. Mozliwosc wylaczenia incognito przez nadpisanie metody useIncognito().<br>
+4. Konfiguracje logow performance Chrome.<br>
+5. Zamykanie przegladarki po kazdym tescie.<br>
+6. Pomocnicza metode takeScreenshot().<br>
+<br>
+<br>
+PODSUMOWANIE<br>
+<br>
+Projekt zawiera testy:<br>
+- CollectionTest<br>
+- DmpEventsTest<br>
+- HomeCarouselPinnedProductTest<br>
+- NewsletterFakerTest<br>
+- PepcoClubTest<br>
+- RandomCityFromFakerTest<br>
+- StoreLocatorCsvTest<br>
+- TrendyTest<br>
+<br>
+Zastosowane techniki:<br>
+- Selenium WebDriver,<br>
+- JUnit 5,<br>
+- Page Object Model,<br>
+- PageFactory,<br>
+- WebDriverWait,<br>
+- data driven testing przez MethodSource,<br>
+- data driven testing przez CSV,<br>
+- DataFaker,<br>
+- screenshoty po waznych akcjach,<br>
+- diagnostyka requestow Mediarithmics przez logi performance Chrome.<br>
+</div>
+  <div class="footer-note">Uwaga: test newslettera może zależeć od zewnętrznego backendu, mechanizmów antyspamowych lub walidacji formularza po stronie serwisu.</div>
+</section>
+</body>
+</html>

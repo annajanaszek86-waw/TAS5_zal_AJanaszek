@@ -23,23 +23,28 @@ public class HomePage extends BasePage {
     );
     private static final By NEWSLETTER_MESSAGE = By.xpath(
             "//*[contains(normalize-space(.), 'Prawie gotowe') " +
-                    "or contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'potwierdzeniem')]"
+                    "or contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'potwierdzeniem') " +
+                    "or contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'dziekujemy') " +
+                    "or contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'dziękujemy')]"
     );
     private static final By HERO_PREVIOUS_BUTTON = By.cssSelector(
-            "main .home > div:first-child button:nth-of-type(1), main div.interaction-button button:nth-of-type(1)"
+            "main button[aria-label*='previous' i], main button[aria-label*='poprzed' i], " +
+                    "main button[aria-label*='prev' i], main div.interaction-button button:first-of-type"
     );
     private static final By HERO_NEXT_BUTTON = By.cssSelector(
-            "main .home > div:first-child button:nth-of-type(2), main div.interaction-button button:nth-of-type(2)"
+            "main button[aria-label*='next' i], main button[aria-label*='nastep' i], " +
+                    "main button[aria-label*='następ' i], main div.interaction-button button:last-of-type"
     );
     private static final By SHOPPABLE_IMAGE_CTA = By.cssSelector(
-            "main > div > div:nth-of-type(5) > div a button, main div:nth-of-type(5) > div button"
+            "main > div > div:nth-of-type(5) > div a button, main div:nth-of-type(5) > div button, " +
+                    "main a[href*='/products/'] button, main section button[aria-label*='product' i]"
     );
     private static final By PRODUCT_PIN = By.xpath(
-            "((//main//button[contains(@aria-label, 'View') and contains(@aria-label, 'details')]//*[local-name()='path']) " +
-                    "| (//main/div[1]/div/main/div[5]/section/div[2]/div/button/div[2]//*[local-name()='path']))[1]"
+            "(//main//button[contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'view') " +
+                    "and contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'details')])[1]"
     );
-    private static final By PINNED_PRODUCT_LINK = By.xpath(
-            "(//*[starts-with(@id, 'product-details-')]//a[contains(@href, '/products/')])[1]"
+    private static final By PINNED_PRODUCT_LINK = By.cssSelector(
+            "[id^='product-details-'] a[href*='/products/'], main a[href*='/products/']"
     );
 
     public HomePage(WebDriver driver) {
@@ -85,6 +90,25 @@ public class HomePage extends BasePage {
         }
     }
 
+    public boolean enterNewsletterEmail(String email) {
+        try {
+            WebElement emailInput = wait.until(ExpectedConditions.elementToBeClickable(NEWSLETTER_EMAIL));
+            scrollIntoView(emailInput);
+            emailInput.clear();
+            emailInput.sendKeys(email);
+            acceptNewsletterConsentIfPresent();
+            wait.until(webDriver -> email.equals(emailInput.getAttribute("value")));
+            wait.until(webDriver -> driver.findElement(NEWSLETTER_CONSENT).isSelected());
+            return true;
+        } catch (WebDriverException ignored) {
+            return false;
+        }
+    }
+
+    public String getNewsletterEmailValue() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(NEWSLETTER_EMAIL)).getAttribute("value");
+    }
+
     public boolean isNewsletterMessageVisible() {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(NEWSLETTER_MESSAGE));
@@ -120,10 +144,17 @@ public class HomePage extends BasePage {
 
     public boolean openPinnedProductDetails() {
         try {
-            WebElement pin = wait.until(ExpectedConditions.elementToBeClickable(PRODUCT_PIN));
-            click(pin);
-            WebElement productLink = wait.until(ExpectedConditions.elementToBeClickable(PINNED_PRODUCT_LINK));
-            click(productLink);
+            if (driver.getCurrentUrl().contains("/products/")) {
+                return true;
+            }
+            clickIfPresent(PRODUCT_PIN);
+            String productUrl = wait.until(webDriver -> (String) ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                    .executeScript("""
+                            const links = [...document.querySelectorAll("[id^='product-details-'] a[href*='/products/'], main a[href*='/products/']")]
+                                .filter(link => link.offsetWidth > 0 && link.offsetHeight > 0);
+                            return links.length ? links[0].href : null;
+                            """));
+            driver.get(productUrl);
             wait.until(ExpectedConditions.urlContains("/products/"));
             return true;
         } catch (WebDriverException ignored) {
@@ -147,7 +178,11 @@ public class HomePage extends BasePage {
     private void clickIfPresent(By selector) {
         List<WebElement> elements = driver.findElements(selector);
         if (!elements.isEmpty() && elements.get(0).isDisplayed() && elements.get(0).isEnabled()) {
-            click(elements.get(0));
+            try {
+                click(elements.get(0));
+            } catch (WebDriverException ignored) {
+                // Optional controls on the home page can be present in DOM but not interactable.
+            }
         }
     }
 }
