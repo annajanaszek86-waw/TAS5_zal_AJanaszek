@@ -37,7 +37,7 @@ Projekt zawiera nastepujace klasy testowe:
 
 - `CollectionTest` - przejscie z kolekcji produktow do produktu oraz do informacji o zwrotach.
 - `DmpEventsTest` - diagnostyka requestow Mediarithmics po zaakceptowaniu cookies. Test ma charakter diagnostyczny: wypisuje informacje o requestach i pikselach, ale brak zewnetrznego requestu DMP w pojedynczym przebiegu nie przerywa calej suity.
-- `HomeCarouselPinnedProductTest` - sciezka ze strony glownej przez karuzele, CTA, pin produktu i strone produktu.
+- `CurrentLeafletPinnedProductTest` - sciezka z aktualnej oferty gazetkowej przez pin produktu do strony produktu.
 - `NewsletterFakerTest` - wpisanie do formularza newslettera adresu e-mail wygenerowanego przez DataFaker oraz weryfikacja wartosci pola, bez wysylania formularza.
 - `PepcoClubTest` - sprawdzenie linkow do aplikacji Pepco w App Store i Google Play.
 - `RandomCityFromFakerTest` - wyszukiwanie sklepu dla losowego miasta z DataFaker.
@@ -49,7 +49,7 @@ Projekt zawiera nastepujace klasy testowe:
 ```powershell
 ./mvnw -Dtest=CollectionTest test
 ./mvnw -Dtest=DmpEventsTest test
-./mvnw -Dtest=HomeCarouselPinnedProductTest test
+./mvnw -Dtest=CurrentLeafletPinnedProductTest test
 ./mvnw -Dtest=NewsletterFakerTest test
 ./mvnw -Dtest=PepcoClubTest test
 ./mvnw -Dtest=RandomCityFromFakerTest test

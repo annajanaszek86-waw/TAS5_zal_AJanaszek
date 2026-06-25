@@ -11,6 +11,10 @@ import java.util.List;
 
 public class TrendyPage extends BasePage {
     private static final By PRODUCT_LINK = By.cssSelector("a[href*='/products/']");
+    private static final By CURRENT_LEAFLET_PIN = By.cssSelector(
+            "main div:nth-of-type(5) section div:nth-of-type(2) button:nth-of-type(2), " +
+                    "main div:nth-of-type(5) button:nth-of-type(2)"
+    );
 
     @FindBy(css = "h1")
     private WebElement title;
@@ -57,6 +61,17 @@ public class TrendyPage extends BasePage {
             return true;
         } catch (WebDriverException ignored) {
             return false;
+        }
+    }
+
+    public boolean clickCurrentLeafletPinnedProduct() {
+        try {
+            WebElement pin = wait.until(ExpectedConditions.elementToBeClickable(CURRENT_LEAFLET_PIN));
+            click(pin);
+            wait.until(ExpectedConditions.urlContains("/products/"));
+            return true;
+        } catch (WebDriverException pinClickFailed) {
+            return clickProduct(0);
         }
     }
 }
